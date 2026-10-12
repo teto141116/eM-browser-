@@ -27,7 +27,7 @@ jobs:
         run: |
           set -e
 
-          ZIP_FILE=$(find . -maxdepth 2 -type f -iname "*.zip" | head -n 1)
+          ZIP_FILE=$(find . -maxdepth 2 -type f -iname "*.zip" -print -quit)
 
           if [ -z "$ZIP_FILE" ]; then
             echo "ERROR: No ZIP file was found."
@@ -48,7 +48,8 @@ jobs:
           unzip -q "${{ steps.find_zip.outputs.zip_file }}" -d extracted
 
           echo "Extracted files:"
-          find extracted -maxdepth 3 -type f | head -100
+          find extracted -maxdepth 3 -type f -print > /tmp/extracted-files.txt
+          sed -n '1,100p' /tmp/extracted-files.txt || true
 
       - name: Locate Gradle project
         id: locate_project
@@ -56,7 +57,7 @@ jobs:
         run: |
           set -e
 
-          PROJECT_ROOT=$(find extracted -name "settings.gradle.kts" -o -name "settings.gradle" | head -n 1)
+          PROJECT_ROOT=$(find extracted \( -name "settings.gradle.kts" -o -name "settings.gradle" \) -print -quit)
 
           if [ -z "$PROJECT_ROOT" ]; then
             echo "ERROR: settings.gradle.kts or settings.gradle was not found."
@@ -90,7 +91,7 @@ jobs:
         run: |
           set -e
 
-          APK=$(find extracted -type f -name "*.apk" | head -n 1)
+          APK=$(find extracted -type f -name "*.apk" -print -quit)
 
           if [ -z "$APK" ]; then
             echo "ERROR: APK was not generated."
